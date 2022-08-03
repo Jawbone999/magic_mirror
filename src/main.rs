@@ -24,9 +24,13 @@ struct RequestInformation {
 
 #[debug_handler]
 async fn handler(method: Method, uri: Uri, json: Option<Json<Value>>) -> Json<RequestInformation> {
-    dbg!(Json(RequestInformation {
+    let info = RequestInformation {
         method: method.to_string(),
         uri: uri.to_string(),
         json: json.map(|json| json.0).unwrap_or_default(),
-    }))
+    };
+
+    println!("{info:?}");
+
+    Json(info)
 }
