@@ -1,6 +1,6 @@
 use axum::{
     handler::Handler,
-    http::{Method, Uri},
+    http::{HeaderMap, Method, Uri},
     Json, Server,
 };
 use axum_macros::debug_handler;
@@ -23,12 +23,18 @@ struct RequestInformation {
 }
 
 #[debug_handler]
-async fn handler(method: Method, uri: Uri, json: Option<Json<Value>>) -> Json<RequestInformation> {
+async fn handler(
+    method: Method,
+    uri: Uri,
+    headers: HeaderMap,
+    json: Option<Json<Value>>,
+) -> Json<RequestInformation> {
     let info = RequestInformation {
         method: method.to_string(),
         uri: uri.to_string(),
         json: json.map(|json| json.0).unwrap_or_default(),
     };
+    dbg!(headers);
 
     println!("{info:?}");
 
