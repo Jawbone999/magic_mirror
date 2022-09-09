@@ -1,9 +1,6 @@
-use axum::{
-    handler::Handler,
-    http::{HeaderMap, Method, Uri},
-    Json, Server,
-};
+use axum::{body::Body, handler::Handler, http::Request, Server};
 use axum_macros::debug_handler;
+use futures::TryStreamExt;
 use serde::Serialize;
 use serde_json::Value;
 
@@ -23,20 +20,24 @@ struct RequestInformation {
 }
 
 #[debug_handler]
-async fn handler(
-    method: Method,
-    uri: Uri,
-    headers: HeaderMap,
-    json: Option<Json<Value>>,
-) -> Json<RequestInformation> {
-    let info = RequestInformation {
-        method: method.to_string(),
-        uri: uri.to_string(),
-        json: json.map(|json| json.0).unwrap_or_default(),
-    };
-    dbg!(headers);
+async fn handler(request: Request<Body>) -> String {
+    let (parts, body) = request.into_parts();
 
-    println!("{info:?}");
+    let mut output = parts.headers.iter().fold(
+        format!("{:?} 200 OK\n", parts.version),
+        |mut acc, (key, value)| {
+            acc.push_str(&format!("\n{key}: {value:?}"));
+            acc
+        },
+    );
 
-    Json(info)
+    let body_string = body
+        .map_ok(|bytes| String::from_utf8_lossy(bytes.as_ref()).to_string())
+        .try_collect::<String>()
+        .await
+        .unwrap();
+
+    output.push_str(&format!("\n\n{body_string}"));
+
+    output
 }
