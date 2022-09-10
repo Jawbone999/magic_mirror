@@ -24,7 +24,10 @@ async fn handler(request: Request<Body>) -> String {
     let (parts, body) = request.into_parts();
 
     let mut output = parts.headers.iter().fold(
-        format!("{:?} 200 OK\n", parts.version),
+        format!(
+            "{} {} {:?} 200 OK\n",
+            parts.method, parts.uri, parts.version
+        ),
         |mut acc, (key, value)| {
             acc.push_str(&format!("\n{key}: {value:?}"));
             acc
