@@ -1,8 +1,6 @@
 use axum::{body::Body, handler::Handler, http::Request, Server};
 use axum_macros::debug_handler;
 use futures::TryStreamExt;
-use serde::Serialize;
-use serde_json::Value;
 
 #[tokio::main]
 async fn main() {
@@ -10,13 +8,6 @@ async fn main() {
         .serve(handler.into_make_service())
         .await
         .unwrap();
-}
-
-#[derive(Debug, Serialize)]
-struct RequestInformation {
-    method: String,
-    uri: String,
-    json: Value,
 }
 
 #[debug_handler]
